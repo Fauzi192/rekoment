@@ -1,38 +1,51 @@
 import streamlit as st
 import pandas as pd
 import pickle
-from sklearn.neighbors import NearestNeighbors
 
-# Load data dan model
+# Load dataset dan model KNN
 @st.cache_data
-def load_data():
-    df = pd.read_csv('anime.csv')  # pastikan file ini ada
-    with open('knn_recommender_model.pkl', 'rb') as file:
+def load_resources():
+    df = pd.read_csv("anime.csv")  # Berisi kolom 'name' dan 'genre'
+    with open("knn_recommender_model.pkl", "rb") as file:
         model = pickle.load(file)
-    return df, model)
+    return df, model
+
+# Fungsi mencari rekomendasi
+def get_recommendations(title, df, model, n_neighbors=6):
+    if title not in df['name'].values:
+        return ["Anime tidak ditemukan dalam data."]
+    
+    # TF-IDF genre vectorizer
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    tfidf = TfidfVectorizer(stop_words="english")
+    tfidf_matrix = tfidf.fit_transform(df['genre'].fillna(''))
+
+    # Cari indeks anime yang dipilih
+    index = df[df['name'] == title].index[0]
+
+    # Cari tetangga terdekat
+    distances, indices = model.kneighbors(tfidf_matrix[index], n_neighbors=n_neighbors)
+
+    # Ambil nama-nama anime rekomendasi
+    recommended_indices = indices[0][1:]  # abaikan diri sendiri
+    recommendations = df.iloc[recommended_indices]['name'].tolist()
+    return recommendations
+
+# UI Streamlit
+st.set_page_config(page_title="Rekomendasi Anime", layout="centered")
+st.title("🎌 Sistem Rekomendasi Anime")
+st.markdown("Masukkan anime favoritmu dan dapatkan rekomendasi serupa berdasarkan genre (Jotjib - KNN).")
 
 # Load data dan model
-anime_df, knn_model = load_data()
+df_anime, knn_model = load_resources()
+anime_titles = df_anime['name'].dropna().unique()
 
-# Set halaman
-st.set_page_config(page_title="Rekomendasi Anime", layout="centered")
-st.title("🎌 Sistem Rekomendasi Anime (KNN)")
-st.write("Masukkan judul anime favoritmu untuk mendapatkan rekomendasi.")
+# Input pengguna
+selected_anime = st.selectbox("Pilih anime favorit:", sorted(anime_titles))
 
-# Dropdown anime
-anime_list = anime_df['name'].tolist()
-selected_anime = st.selectbox("Pilih anime favorit kamu:", anime_list)
-
-# Fungsi rekomendasi
-def get_knn_recommendations(selected_title, model, df, n_recommendations=5):
-    index = df[df['name'] == selected_title].index[0]
-    distances, indices = model.kneighbors([df.iloc[index, 1:]], n_neighbors=n_recommendations + 1)
-    recommended_indices = indices[0][1:]  # skip indeks pertama karena itu anime yang sama
-    return df['name'].iloc[recommended_indices]
-
-# Tampilkan hasil
+# Hasil rekomendasi
 if selected_anime:
-    st.subheader("Rekomendasi Anime Serupa:")
-    recommendations = get_knn_recommendations(selected_anime, knn_model, anime_df)
-    for i, rec in enumerate(recommendations, 1):
-        st.write(f"{i}. {rec}")
+    st.subheader("Rekomendasi untuk kamu:")
+    recommended_anime = get_recommendations(selected_anime, df_anime, knn_model)
+    for i, title in enumerate(recommended_anime, 1):
+        st.write(f"{i}. {title}")
