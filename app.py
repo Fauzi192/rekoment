@@ -11,22 +11,7 @@ st.write("Masukkan judul anime favoritmu dan dapatkan rekomendasi serupa.")
 
 # ------------------- DATASET (sementara hardcoded) -------------------
 # Ganti dengan pd.read_csv('anime.csv') jika kamu punya file asli
-anime_data = {
-    "name": [
-        "Naruto", "Bleach", "One Piece", "Death Note", "Attack on Titan",
-        "Fullmetal Alchemist", "Demon Slayer", "Jujutsu Kaisen",
-        "My Hero Academia", "Tokyo Ghoul"
-    ],
-    "genre": [
-        "Action, Adventure, Super Power", "Action, Supernatural", "Action, Adventure, Fantasy",
-        "Mystery, Supernatural, Psychological", "Action, Drama, Fantasy",
-        "Action, Military, Fantasy", "Action, Demons, Historical",
-        "Action, Supernatural, School", "Action, Comedy, Super Power",
-        "Action, Horror, Supernatural"
-    ]
-}
-anime_df = pd.DataFrame('anime.csv')
-
+anime_df = pd.read_csv('anime.csv')
 # ------------------- LOAD MODEL -------------------
 @st.cache_resource
 def load_model():
