@@ -1,5 +1,6 @@
 import streamlit as st
 import pickle
+import joblib
 import numpy as np
 
 # Konfigurasi halaman
@@ -14,10 +15,8 @@ st.title("🎌 Sistem Rekomendasi Anime")
 st.write("Masukkan judul anime favoritmu dan dapatkan rekomendasi serupa.")
 
 # Load model KNN
-@st.cache_resource
 def load_model():
-    with open("knn_recommender_model.pkl", "rb") as f:
-        model = pickle.load(f)
+    model = joblib.load("knn_recommender_model.pkl")
     return model
 
 model = load_model()
