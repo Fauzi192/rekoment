@@ -3,13 +3,13 @@ import pandas as pd
 import pickle
 
 # Load dataset dan model KNN
+import joblib
+
 @st.cache_data
 def load_resources():
-    df = pd.read_csv("anime.csv")  # Berisi kolom 'name' dan 'genre'
-    with open("knn_recommender_model.pkl", "rb") as file:
-        model = pickle.load(file)
+    df = pd.read_csv("anime.csv")
+    model = joblib.load("knn_recommender_model.pkl")  # ganti dari pickle ke joblib
     return df, model
-
 # Fungsi mencari rekomendasi
 def get_recommendations(title, df, model, n_neighbors=6):
     if title not in df['name'].values:
